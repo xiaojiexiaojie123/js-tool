@@ -139,40 +139,43 @@ function dataURLtoFile(dataurl, filename) {
 }
 // 倒计时
 function NewTimer (totalMilliSec, changeAct, endAct, interval) {
-    this.totalMilliSec = totalMilliSec;
-    this.changeAct = changeAct;
-    this.endAct = endAct;
-    this.interval = totalMilliSec > 24 * 3600 * 1000 ? 1000 : (interval ? interval : 90);
-    this.day = 0;
-    this.hour = 0;
-    this.minute = 0;
-    this.second = 0;
-    this.millisecond = 0;
-    this.calculate = function () {
-        this.day = Math.floor(this.totalMilliSec / (3600 * 1000 * 24));
-        this.hour = Math.floor((this.totalMilliSec - this.day * 3600 * 1000 * 24) / (3600 * 1000));
-        this.minute = Math.floor((this.totalMilliSec - this.day * 3600 * 1000 * 24 - this.hour * 3600 * 1000) / (60 * 1000));
-        this.second = Math.floor((this.totalMilliSec - this.day * 3600 * 1000 * 24 - this.hour * 3600 * 1000 - this.minute * 60 * 1000) / 1000);
-        this.millisecond = this.totalMilliSec - this.day * 3600 * 1000 * 24 - this.hour * 3600 * 1000 - this.minute * 60 * 1000 - this.second * 1000;
-        this.day = this.day < 10 ? '0' + this.day : this.day;
-        this.hour = this.hour < 10 ? '0' + this.hour : this.hour;
-        this.minute = this.minute < 10 ? '0' + this.minute : this.minute;
-        this.second = this.second < 10 ? '0' + this.second : this.second;
-        this.millisecond = this.millisecond < 10 ? '00' : (this.millisecond < 100 ? '0' + parseInt(this.millisecond / 10) : parseInt(this.millisecond / 10));
-        this.changeAct([this.day, this.hour, this.minute, this.second, this.millisecond]);
+        this.totalMilliSec = totalMilliSec;
+        this.changeAct = changeAct;
+        this.endAct = endAct;
+        this.interval = interval ? interval : (totalMilliSec > 24 * 3600 * 1000 ? 1000 : (interval ? interval : 100));
+        this.day = 0;
+        this.hour = 0;
+        this.minute = 0;
+        this.second = 0;
+        this.millisecond = 0;
+        this.calculate = function () {
+            this.day = Math.floor(this.totalMilliSec / (3600 * 1000 * 24));
+            this.hour = Math.floor(this.totalMilliSec / 1000 / 60 / 60 % 24);
+            this.minute = Math.floor(this.totalMilliSec / 1000 / 60 % 60);
+            this.second = Math.floor(this.totalMilliSec / 1000 % 60);
+            this.millisecond = Math.floor((this.totalMilliSec % 1000) / 100);
+
+            this.hour = this.hour < 10 ? '0' + this.hour : this.hour;
+            this.minute = this.minute < 10 ? '0' + this.minute : this.minute;
+            this.second = this.second < 10 ? '0' + this.second : this.second;
+
+            this.changeAct([this.day, this.hour, this.minute, this.second, this.millisecond]);
+        }
+        this.startCountDown = function () {
+            this.calculate();
+            var _this = this;
+            var timer = setInterval(function () {
+                if (_this.totalMilliSec == 24 * 60 * 60 * 1000 && !interval) {
+                    window.location.reload();
+                }
+                if (_this.totalMilliSec < 0) {
+                    clearInterval(timer);
+                    _this.endAct && _this.endAct();
+                } else {
+                    _this.calculate();
+                    _this.totalMilliSec -= _this.interval;
+                }
+            }, _this.interval);
+            return timer;
+        }
     }
-    this.startCountDown = function () {
-        this.calculate();
-        var _this = this;
-        var timer = setInterval(function () {
-            if (_this.totalMilliSec < 0) {
-                clearInterval(timer);
-                _this.endAct && _this.endAct();
-            } else {
-                _this.calculate();
-                _this.totalMilliSec -= _this.interval;
-            }
-        }, _this.interval);
-        return timer;
-    }
-}
