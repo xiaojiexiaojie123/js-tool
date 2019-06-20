@@ -179,3 +179,17 @@ function NewTimer (totalMilliSec, changeAct, endAct, interval) {
             return timer;
         }
     }
+<script type="text/javascript">
+    var designWidth = 750, rem2px = 100;
+    var html = document.querySelector("html");
+    var htmlFontSize = parseFloat(window.getComputedStyle(html, null).getPropertyValue('font-size'));
+
+    function refreshRem() {
+        html.style.fontSize = html.getBoundingClientRect().width / designWidth * rem2px / htmlFontSize * 100 + '%';
+    }
+
+    refreshRem();
+    window.addEventListener("resize", function () {
+        refreshRem();
+    });
+</script>
